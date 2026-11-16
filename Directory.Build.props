@@ -7,5 +7,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- CI also builds against the oldest Jellyfin that targetAbi (meta.json) accepts. -->
+    <JellyfinVersion Condition="'$(JellyfinVersion)' == ''">12.4.0</JellyfinVersion>
   </PropertyGroup>
 </Project>

@@ -2,8 +2,6 @@
 
   <PropertyGroup>
     <RootNamespace>Jellyfin.Plugin.SensCritique</RootNamespace>
-    <!-- CI also builds against the oldest Jellyfin that targetAbi (meta.json) accepts. -->
-    <JellyfinVersion Condition="'$(JellyfinVersion)' == ''">12.4.0</JellyfinVersion>
   </PropertyGroup>
 
   <ItemGroup>
