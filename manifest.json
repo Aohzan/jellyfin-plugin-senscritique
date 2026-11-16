@@ -2,7 +2,7 @@
   {
     "guid": "a6bebeff-c0d4-4549-b068-d6038ae7b53f",
     "name": "SensCritique",
-    "description": "Replaces the community rating of movies and series with their SensCritique rating. Not affiliated with SensCritique: it uses the non-public API of their website and will be taken down if SensCritique asks for it. Enable SensCritique in a library's metadata downloaders and move it to the top.",
+    "description": "Replaces the community rating of movies and series with their SensCritique rating. Not affiliated with SensCritique: it uses the non-public API of their website and will be taken down if SensCritique asks for it.",
     "overview": "Community ratings from SensCritique",
     "owner": "Aohzan",
     "category": "Metadata",

@@ -1,15 +1,16 @@
 # AGENTS.md
 
 Jellyfin 12 plugin that replaces the community rating of movies and series
-with their SensCritique rating. It is a remote metadata provider returning only
-`CommunityRating` and a `SensCritique` provider id; placed first among a
-library's metadata downloaders, its rating wins over TMDb's.
+with their SensCritique rating. It is a custom metadata provider
+(`ICustomMetadataProvider`): Jellyfin runs it after the metadata downloaders,
+on the identified item, and it sets `CommunityRating` and a `SensCritique`
+provider id.
 
 ## Layout
 
 | Path | Content |
 | --- | --- |
-| `Jellyfin.Plugin.SensCritique/Providers/SensCritiqueMetadataProvider.cs` | Provider for `Movie` and `Series`: stored id first, then title search |
+| `Jellyfin.Plugin.SensCritique/Providers/SensCritiqueMetadataProvider.cs` | Custom provider for `Movie` and `Series`: stored id first, then title search; sets the rating and the id on the item |
 | `Jellyfin.Plugin.SensCritique/Matching/TitleMatcher.cs` | Pure matching rules (titles, years), unit tested |
 | `Jellyfin.Plugin.SensCritique/Api/SensCritiqueClient.cs` | GraphQL client: search and product by id, throttled |
 | `Jellyfin.Plugin.SensCritique/Providers/SensCritiqueExternal*.cs` | Id field in the metadata editor, link to senscritique.com |
@@ -26,14 +27,17 @@ library's metadata downloaders, its rating wins over TMDb's.
 - Never change the plugin GUID (`Plugin.cs`, `meta.json`, `manifest.json`) or
   the provider name and id key `SensCritique`: installations and the ids
   stored on items depend on them.
-- Jellyfin merges remote providers in the library's order and keeps the first
-  value of each field (`MetadataService.MergeBaseItemData` with
-  `replaceData = false`). Returning anything else than the rating and the id
-  would override TMDb's data, so the provider leaves every other field empty.
-- An existing `CommunityRating` is only replaced by a refresh with
-  `ReplaceAllMetadata`, or by the automatic refresh of the library interval
-  (`MetadataRefreshMode.Default` with `requiresRefresh`). A plain refresh keeps
-  it: say so when documenting how to apply the plugin to existing items.
+- Why a custom provider and not a remote one (metadata downloader): a remote
+  provider runs before TMDb has identified a new item, so it would search with
+  the file name; and an existing `CommunityRating` is only replaced by a
+  refresh with `ReplaceAllMetadata` or by the library's automatic refresh.
+  `MetadataService` runs custom providers after merging the downloaders' data
+  into the item, whenever it runs all providers (new item, `FullRefresh`,
+  `ReplaceAllMetadata`, automatic refresh), and saves what they change.
+- Custom providers are not listed among a library's metadata downloaders: they
+  cannot be enabled per library and always run on movies and series.
+- `ItemUpdateType.None` is a flag (1), not 0: return it or `MetadataDownload`,
+  never a combination.
 - Matching must stay conservative: a wrong rating is worse than TMDb's. A
   change of `TitleMatcher` is checked against a real library, comparing with
   the SensCritique ids Wikidata holds (property P10100, IMDb id P345), and

@@ -19,21 +19,14 @@ Requires Jellyfin 12.
 
 2. Install SensCritique from the plugin catalog, then restart Jellyfin.
 
-## Enable it in a library
+## Apply it to your libraries
 
-For each movie or series library, in Dashboard > Libraries > the library >
-Manage library:
-
-1. Under the Movie (or Series) metadata downloaders, check SensCritique and
-   move it to the top.
-2. Save.
-
-New items get their SensCritique rating when they are added. Existing items
-keep their current rating until their metadata is replaced: either wait for
-the automatic refresh (Manage library > Automatically refresh metadata from
-the internet), or run Refresh metadata on the library with "Replace all
-metadata" (images can stay unchecked). A plain refresh or "Search for missing
-metadata" keeps the existing rating.
+The plugin has no setting: it applies to every movie and series, in every
+library. New items get their SensCritique rating when they are added. Existing
+items get it at their next metadata refresh: run Refresh metadata on a library
+with "Search for missing metadata", or wait for the automatic refresh (Manage
+library > Automatically refresh metadata from the internet). "Scan for new and
+updated files" only refreshes new and changed items.
 
 ## Show the SensCritique symbol in the web client
 
@@ -45,20 +38,21 @@ apps (Android TV, Swiftfin) draw their own star.
 
 ## Fix a match
 
-Items without a match keep the rating of the next metadata downloader (TMDb)
-and are logged at Information level: `No SensCritique match for <name>
-(<year>)`. To set or correct the match of an item, enter its SensCritique id
-(the number at the end of its senscritique.com URL) in the metadata editor,
-under External IDs, then refresh its metadata. The SensCritique link of an
-item opens the matched work.
+Items without a match keep the rating of the metadata downloaders (TMDb) and
+are logged at Information level: `No SensCritique match for <name> (<year>)`.
+To set or correct the match of an item, enter its SensCritique id (the number
+at the end of its senscritique.com URL) in the metadata editor, under External
+IDs, then refresh its metadata with "Search for missing metadata". The
+SensCritique link of an item opens the matched work.
 
 ## How it works
 
-The plugin is a metadata downloader for movies and series that returns only
-the community rating and a SensCritique id. Jellyfin keeps, for each field,
-the value of the first downloader that returns one: placed first, SensCritique
-sets the rating, and TMDb and the others still fill every other field. When
-SensCritique has no match, or the work has no rating yet, the next downloader's
+The plugin is a custom metadata provider for movies and series. Jellyfin runs
+it after the metadata downloaders (TMDb, OMDb) have filled the item, on every
+refresh that runs the providers: a new item, "Search for missing metadata",
+"Replace all metadata" and the automatic refresh. It sets the community rating
+and a SensCritique id, and leaves every other field to the downloaders. When
+SensCritique has no match, or the work has no rating yet, the downloaders'
 rating is kept.
 
 Finding the SensCritique work:
@@ -66,7 +60,7 @@ Finding the SensCritique work:
 1. An item that already has a SensCritique id, from an earlier match or set by
    hand, is looked up by id. Its rating is refreshed and the match is kept.
 2. Otherwise the plugin searches SensCritique by original title, then by name,
-   among movies or series. A result matches when its French or original title
+   as the downloaders identified them, among movies or series. A result matches when its French or original title
    equals one of the item's titles, ignoring case, accents, punctuation and a
    trailing parenthesized part such as "(US)", and when one of its years
    (production, release) is within 1 year of the item's, or 3 for series
@@ -84,6 +78,8 @@ it writes differently ("Dead Reckoning" for "Dead Reckoning Part One").
   website (`apollo.senscritique.com`), one request at a time, 500 ms apart: it
   can break whenever SensCritique changes it.
 - Seasons and episodes keep their rating.
+- It cannot be turned off for a single library: Jellyfin has no per-library
+  setting for custom providers.
 
 ## Disclaimer
 
