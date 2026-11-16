@@ -17,6 +17,7 @@ library's metadata downloaders, its rating wins over TMDb's.
 | `meta.json` | Plugin manifest shipped in the zip (`targetAbi`, version set at release) |
 | `manifest.json` | Jellyfin plugin repository users subscribe to, one entry per release |
 | `scripts/release.sh` | Sets the version, builds the zip, adds the release to `manifest.json` |
+| `images/logo.svg`, `logo.png` | Catalog image (`imageUrl` of `manifest.json`, 1920x1080) with the SensCritique logo of senscritique.com; PNG rendered from the SVG with `rsvg-convert` |
 
 ## Conventions
 

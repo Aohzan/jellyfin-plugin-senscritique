@@ -1,5 +1,7 @@
 # Jellyfin SensCritique plugin
 
+![SensCritique ratings for Jellyfin](images/logo.png)
+
 Replaces the community rating of movies and series with their
 [SensCritique](https://www.senscritique.com) rating (out of 10). Every client
 that shows Jellyfin's community rating picks it up, including Kodi through the
@@ -74,6 +76,13 @@ it writes differently ("Dead Reckoning" for "Dead Reckoning Part One").
   website (`apollo.senscritique.com`), one request at a time, 500 ms apart: it
   can break whenever SensCritique changes it.
 - Seasons and episodes keep their rating.
+
+## Disclaimer
+
+This plugin is not affiliated with, endorsed or supported by SensCritique. It
+reads ratings through the API of the SensCritique website, which is not public,
+and will be taken down if SensCritique asks for it. The SensCritique name and
+logo belong to their owner and only identify the service the ratings come from.
 
 ## Development
 

@@ -35,7 +35,7 @@ public class Plugin : BasePlugin<PluginConfiguration>
     public override string Name => ProviderName;
 
     /// <inheritdoc />
-    public override string Description => "Community ratings from SensCritique for movies and series.";
+    public override string Description => "Community ratings from SensCritique for movies and series. Not affiliated with SensCritique.";
 
     /// <inheritdoc />
     public override Guid Id => Guid.Parse("a6bebeff-c0d4-4549-b068-d6038ae7b53f");
