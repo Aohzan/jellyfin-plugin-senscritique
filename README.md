@@ -35,6 +35,14 @@ the internet), or run Refresh metadata on the library with "Replace all
 metadata" (images can stay unchecked). A plain refresh or "Search for missing
 metadata" keeps the existing rating.
 
+## Show the SensCritique symbol in the web client
+
+Jellyfin draws a star next to the community rating. To show the SensCritique
+symbol instead, paste the content of [`css/rating-icon.css`](css/rating-icon.css)
+in Dashboard > General > Custom CSS. It applies to the clients built on the web
+client (browsers, Jellyfin Media Player, the Android app). Kodi and the native
+apps (Android TV, Swiftfin) draw their own star.
+
 ## Fix a match
 
 Items without a match keep the rating of the next metadata downloader (TMDb)
