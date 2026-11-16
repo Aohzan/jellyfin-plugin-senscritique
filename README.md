@@ -36,6 +36,12 @@ in Dashboard > General > Custom CSS. It applies to the clients built on the web
 client (browsers, Jellyfin Media Player, the Android app). Kodi and the native
 apps (Android TV, Swiftfin) draw their own star.
 
+![Series rating with the SensCritique symbol](images/web-series.png)
+![Movie rating with the SensCritique symbol](images/web-movie.png)
+
+The tomato next to it is the Rotten Tomatoes critic rating (OMDb): the last
+rule of the CSS, commented out, hides it.
+
 ## Fix a match
 
 Items without a match keep the rating of the metadata downloaders (TMDb) and
