@@ -1,0 +1,136 @@
+---
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions: {}
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install prek, committed and .NET
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          install_args: prek committed dotnet
+
+      - name: Cache lint environments
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/prek
+          key: prek-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Run linters
+        # no-commit-to-branch only guards local commits; the tests have their own job.
+        run: SKIP=no-commit-to-branch,dotnet-test prek run --all-files --show-diff-on-failure
+
+      - name: Check commit messages
+        # Dependabot subjects name long paths and packages; their prefix is set in dependabot.yml.
+        if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: committed "${BASE_SHA}..${HEAD_SHA}"
+
+  test:
+    name: Tests (Jellyfin ${{ matrix.jellyfin }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # The oldest Jellyfin that targetAbi (meta.json) accepts, and the
+          # version of the csproj.
+          - jellyfin: oldest
+            msbuild_args: -p:JellyfinVersion=12.0.0
+          - jellyfin: current
+            msbuild_args: ""
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install .NET
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          install_args: dotnet
+
+      - name: Run tests
+        env:
+          MSBUILD_ARGS: ${{ matrix.msbuild_args }}
+        run: dotnet test ${MSBUILD_ARGS}
+
+  # Builds the plugin zip of a pull request, to install it by hand on a test
+  # server before the release.
+  package:
+    name: Package
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install .NET
+        uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          install_args: dotnet
+
+      - name: Build the zip
+        # 0.0.<run>.0 sorts before every release: Jellyfin offers the next
+        # release as an update of a test build.
+        env:
+          RUN_NUMBER: ${{ github.run_number }}
+        run: scripts/release.sh "0.0.${RUN_NUMBER}"
+
+      - name: Upload the zip
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: senscritique-${{ github.run_number }}
+          path: dist/senscritique_*.zip
+          retention-days: 7
+
+  # Dependabot updates are merged once the checks passed, except semver-major
+  # ones. RELEASE_TOKEN (an Actions and a Dependabot secret) makes the merge
+  # trigger the release workflow.
+  dependabot:
+    name: Dependabot merge
+    needs: [lint, test]
+    # Opened by Dependabot from a branch of the repository. The called workflow
+    # also checks the last push came from Dependabot, with its commits.
+    if: >-
+      github.event_name == 'pull_request'
+      && github.event.pull_request.user.login == 'dependabot[bot]'
+      && github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: Aohzan/.github/.github/workflows/dependabot-merge.yaml@ae7bef8d171afeda0951efefff7f1f1737a5cb39 # v3
+    secrets:
+      RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}

@@ -1,0 +1,37 @@
+---
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: ci
+
+  # Jellyfin packages are compile-time references (the server provides them)
+  # and test tools: no release needed.
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: build
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: build
+    ignore:
+      # Major 10 needs conventional-changelog-writer 9, which
+      # @semantic-release/release-notes-generator does not use yet.
+      - dependency-name: conventional-changelog-conventionalcommits
+        update-types: [version-update:semver-major]

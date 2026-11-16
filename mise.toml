@@ -1,0 +1,26 @@
+[settings]
+# Never install a tool version published less than 7 days ago.
+minimum_release_age = "7d"
+
+[tools]
+prek = "latest"
+node = "lts"
+dotnet = "10"
+zizmor = "latest"
+committed = "latest"
+
+[tasks.install]
+description = "Install development dependencies and git hooks"
+run = [
+  "npm ci",
+  "dotnet restore",
+  "prek install --hook-type pre-commit --hook-type commit-msg",
+]
+
+[tasks.lint]
+description = "Run every linter on the whole repository"
+run = "prek run --all-files"
+
+[tasks.test]
+description = "Run the unit tests"
+run = "dotnet test"
