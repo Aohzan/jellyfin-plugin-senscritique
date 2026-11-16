@@ -1,0 +1,11 @@
+[
+  {
+    "guid": "a6bebeff-c0d4-4549-b068-d6038ae7b53f",
+    "name": "SensCritique",
+    "description": "Replaces the community rating of movies and series with their SensCritique rating. Enable SensCritique in a library's metadata downloaders and move it to the top.",
+    "overview": "Community ratings from SensCritique",
+    "owner": "Aohzan",
+    "category": "Metadata",
+    "versions": []
+  }
+]

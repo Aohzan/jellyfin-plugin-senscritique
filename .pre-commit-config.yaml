@@ -1,0 +1,62 @@
+---
+# Run with prek (mise run lint), a drop-in replacement for pre-commit.
+default_stages: [pre-commit]
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: no-commit-to-branch
+        args: [--branch=main]
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.3
+    hooks:
+      - id: codespell
+        # ChangeLog.md is written by semantic-release.
+        exclude: ^(ChangeLog\.md|package-lock\.json|LICENSE)$
+        # French words: a SensCritique URL path and test titles.
+        args: ["--ignore-words-list", "serie,espace"]
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.24.0
+    hooks:
+      - id: markdownlint-cli2
+
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: v1.32.0
+    hooks:
+      - id: zizmor # GitHub Actions security linter
+
+  - repo: https://github.com/crate-ci/committed
+    rev: v1.1.12
+    hooks:
+      - id: committed
+        stages: [commit-msg]
+
+  - repo: local
+    hooks:
+      - id: dotnet-format
+        name: dotnet format
+        entry: dotnet format --verify-no-changes
+        language: system
+        types: [c#]
+        pass_filenames: false
+      - id: dotnet-test
+        name: dotnet test
+        entry: dotnet test
+        language: system
+        types: [c#]
+        pass_filenames: false
